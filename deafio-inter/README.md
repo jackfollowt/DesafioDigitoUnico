@@ -127,9 +127,3 @@ Implementação **própria** (sem frameworks de cache de mercado), em `config/Di
 - `README.md` — este arquivo.
 - `postman_collection.json` — coleção com os testes integrados (importar no Postman).
 - `openapi.yaml` — especificação OpenAPI da API.
-
-## 🗒️ Notas
-
-- O desafio foi construído de forma **incremental** seguindo TDD (dígito único → cache → persistência →
-  criptografia), conforme o guia em `TASKS`.
-- Banco de dados em memória: os dados são reiniciados a cada execução.
