@@ -1,0 +1,203 @@
+{
+  "info": {
+    "name": "Desafio Digito Unico - Banco Inter",
+    "description": "Testes integrados da API de Digito Unico e CRUD de Usuario com criptografia RSA 2048.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "usuarioId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Digito Unico - exemplo da especificacao (9875, k=4 => 8)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/digito-unico", "host": ["{{baseUrl}}"], "path": ["api", "digito-unico"] },
+        "body": { "mode": "raw", "raw": "{\n  \"n\": \"9875\",\n  \"k\": 4\n}" }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.test('resultado = 8', () => pm.expect(pm.response.json().resultado).to.eql(8));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Digito Unico - mesmo calculo (deve vir do cache)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/digito-unico", "host": ["{{baseUrl}}"], "path": ["api", "digito-unico"] },
+        "body": { "mode": "raw", "raw": "{\n  \"n\": \"9875\",\n  \"k\": 4\n}" }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.test('origemCache = true', () => pm.expect(pm.response.json().origemCache).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Digito Unico - validacao (n nao numerico => 400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/digito-unico", "host": ["{{baseUrl}}"], "path": ["api", "digito-unico"] },
+        "body": { "mode": "raw", "raw": "{\n  \"n\": \"12a3\",\n  \"k\": 1\n}" }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('status 400', () => pm.response.to.have.status(400));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuario - criar",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] },
+        "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"maria.silva@email.com\"\n}" }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', () => pm.response.to.have.status(201));",
+              "const u = pm.response.json();",
+              "pm.test('nome descriptografado pelo servidor', () => pm.expect(u.nome).to.eql('Maria Silva'));",
+              "pm.collectionVariables.set('usuarioId', u.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuario - buscar por id",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/usuarios/{{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "{{usuarioId}}"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] }
+        }
+      ]
+    },
+    {
+      "name": "Usuario - listar todos",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] }
+        }
+      ]
+    },
+    {
+      "name": "Usuario - atualizar",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/usuarios/{{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "{{usuarioId}}"] },
+        "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Maria Souza\",\n  \"email\": \"maria.souza@email.com\"\n}" }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.test('nome atualizado', () => pm.expect(pm.response.json().nome).to.eql('Maria Souza'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Digito Unico - associado ao usuario",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/digito-unico", "host": ["{{baseUrl}}"], "path": ["api", "digito-unico"] },
+        "body": { "mode": "raw", "raw": "{\n  \"n\": \"9875\",\n  \"k\": 4,\n  \"usuarioId\": {{usuarioId}}\n}" }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] }
+        }
+      ]
+    },
+    {
+      "name": "Usuario - recuperar calculos",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/usuarios/{{usuarioId}}/calculos", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "{{usuarioId}}", "calculos"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.test('possui ao menos 1 calculo', () => pm.expect(pm.response.json().length).to.be.above(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chave Publica - obter chave do servidor",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/chave-publica/servidor", "host": ["{{baseUrl}}"], "path": ["api", "chave-publica", "servidor"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] }
+        }
+      ]
+    },
+    {
+      "name": "Usuario - deletar",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{baseUrl}}/api/usuarios/{{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "{{usuarioId}}"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": ["pm.test('status 204', () => pm.response.to.have.status(204));"] }
+        }
+      ]
+    }
+  ]
+}

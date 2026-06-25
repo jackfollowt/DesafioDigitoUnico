@@ -1,0 +1,306 @@
+openapi: 3.0.1
+info:
+  title: Desafio Digito Unico - Banco Inter
+  description: >-
+    API REST para calculo de Digito Unico e CRUD de Usuario com criptografia
+    RSA 2048 bits. O nome e o email do usuario sao armazenados criptografados.
+  version: "1.0"
+  contact:
+    name: Time Alice
+    email: alice.castilho@inter.co
+  license:
+    name: Desafio Tecnico
+servers:
+  - url: http://localhost:8080
+    description: Ambiente local
+tags:
+  - name: Digito Unico
+    description: Calculo do digito unico de P = n concatenado k vezes
+  - name: Usuarios
+    description: CRUD de usuarios com nome/email criptografados (RSA 2048)
+  - name: Chave Publica
+    description: Gestao da chave publica RSA para criptografia
+paths:
+  /api/digito-unico:
+    post:
+      tags: [Digito Unico]
+      summary: Calcula o digito unico; associa ao usuario se usuarioId for informado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculoRequestDTO'
+      responses:
+        '200':
+          description: Calculo realizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculoResponseDTO'
+        '400':
+          description: Parametros invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Usuario informado nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+  /api/usuarios:
+    post:
+      tags: [Usuarios]
+      summary: Cria um novo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDTO'
+      responses:
+        '201':
+          description: Usuario criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDTO'
+        '400':
+          description: Dados invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+    get:
+      tags: [Usuarios]
+      summary: Lista todos os usuarios
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDTO'
+  /api/usuarios/{id}:
+    get:
+      tags: [Usuarios]
+      summary: Busca um usuario por id
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDTO'
+        '404':
+          description: Usuario nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+    put:
+      tags: [Usuarios]
+      summary: Atualiza um usuario
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDTO'
+      responses:
+        '200':
+          description: Usuario atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDTO'
+        '404':
+          description: Usuario nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+    delete:
+      tags: [Usuarios]
+      summary: Remove um usuario
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '204':
+          description: Usuario removido
+        '404':
+          description: Usuario nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+  /api/usuarios/{id}/calculos:
+    get:
+      tags: [Usuarios]
+      summary: Recupera todos os calculos de digito unico de um usuario
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Lista de calculos do usuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalculoResponseDTO'
+        '404':
+          description: Usuario nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+  /api/chave-publica:
+    post:
+      tags: [Chave Publica]
+      summary: Recebe a chave publica do cliente (Base64 X.509/SPKI) para criptografar os dados
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChavePublicaRequestDTO'
+      responses:
+        '200':
+          description: Chave publica registrada
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        '400':
+          description: Chave publica invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+  /api/chave-publica/servidor:
+    get:
+      tags: [Chave Publica]
+      summary: Retorna a chave publica do servidor (util para testes do fluxo de criptografia)
+      responses:
+        '200':
+          description: Chaves publicas (servidor e ativa)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+components:
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  schemas:
+    CalculoRequestDTO:
+      type: object
+      required: [n, k]
+      properties:
+        n:
+          type: string
+          example: "9875"
+          description: String representando um inteiro (1 <= n <= 10^1000000)
+        k:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100000
+          example: 4
+          description: Numero de concatenacoes (1 <= k <= 10^5)
+        usuarioId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1
+          description: Id do usuario para associar o calculo (opcional)
+    CalculoResponseDTO:
+      type: object
+      properties:
+        n:
+          type: string
+          example: "9875"
+        k:
+          type: integer
+          format: int32
+          example: 4
+        resultado:
+          type: integer
+          format: int32
+          example: 8
+          description: Digito unico calculado
+        origemCache:
+          type: boolean
+          description: Indica se o resultado veio do cache em memoria
+    UserRequestDTO:
+      type: object
+      required: [nome, email]
+      properties:
+        nome:
+          type: string
+          example: Maria Silva
+          description: Nome do usuario (sera criptografado)
+        email:
+          type: string
+          format: email
+          example: maria.silva@email.com
+          description: Email do usuario (sera criptografado)
+    UserResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nome:
+          type: string
+          description: Nome (descriptografado quando possivel, senao o ciphertext em Base64)
+        email:
+          type: string
+          description: Email (descriptografado quando possivel, senao o ciphertext em Base64)
+        criptografado:
+          type: boolean
+          description: Indica se nome/email ainda estao criptografados (chave privada indisponivel no servidor)
+        calculos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalculoResponseDTO'
+    ChavePublicaRequestDTO:
+      type: object
+      required: [chavePublica]
+      properties:
+        chavePublica:
+          type: string
+          description: Chave publica RSA em Base64 (X.509/SPKI), com ou sem cabecalhos PEM
+    Erro:
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+        erro:
+          type: string
+        mensagem:
+          type: string
+        campos:
+          type: object
+          additionalProperties:
+            type: string

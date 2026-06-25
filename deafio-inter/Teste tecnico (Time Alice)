@@ -1,0 +1,136 @@
+# DESAFIO TÉCNICO JAVA - BANCO INTER
+
+## 📋 INSTRUÇÕES GERAIS
+
+- Dê o seu melhor!
+- Sinta-se livre para nos perguntar sobre qualquer dúvida
+- **Contato:** alice.castilho@inter.co / andre.mendes@inter.co / marco.lopes@inte.co
+- Envie o teste mesmo se não estiver completo
+- Construa o teste de forma incremental (deixe a criptografia para o final)
+
+---
+
+## 🎯 O DESAFIO: DÍGITO ÚNICO
+
+### Definição
+O dígito único de um inteiro é calculado usando as seguintes regras:
+
+1. **Se x tem apenas um dígito:** o dígito único é x
+2. **Caso contrário:** o dígito único de x é igual ao dígito único da soma dos dígitos de x
+
+### Exemplo Prático
+**Calculando o dígito único de 9875:**
+```
+digito_unico(9875) → 9+8+7+5 = 29
+digito_unico(29) → 2+9 = 11  
+digito_unico(11) → 1+1 = 2
+digito_unico(2) = 2
+```
+
+### Parâmetros da Função
+Dados dois números **n** e **k**, **P** deverá ser criado da concatenação da string n * k vezes.
+
+**Exemplo:**
+- n = 9875 e k = 4
+- p = 9875987598759875
+- Calcular: digitoUnico(9875987598759875)
+- 5+7+8+9+5+7+8+9+5+7+8+9+5+7+8+9 = 116
+- digitoUnico(116) → 1+1+6 = 8
+- digitoUnico(8) = 8
+
+**Especificações da Função:**
+1. **n:** string representando um inteiro (1 ≤ n ≤ 10^1000000)
+2. **k:** inteiro representando o número de concatenações (1 ≤ k ≤ 10^5)
+3. **Retorno:** obrigatoriamente um inteiro
+
+---
+
+## 🏗️ CONSTRUINDO A APLICAÇÃO
+
+### Requisitos Técnicos
+- ✅ Banco de dados em memória
+- ✅ Maven para construir, executar testes e iniciar aplicação
+- ✅ Testes unitários obrigatórios
+- ✅ Testes integrados com Postman
+- ✅ Arquivo Swagger (Open API) com especificação da API
+
+---
+
+## 👤 CRUD DE USUÁRIO
+
+### Estrutura do Usuário
+- **Nome** (criptografado)
+- **Email** (criptografado)  
+- **Lista de resultados** de digitoUnicos já calculados
+
+### Estrutura dos Resultados
+Cada objeto da lista deve conter:
+- Parâmetros de entrada do cálculo
+- Resultado obtido
+
+---
+
+## 🌐 APIS REQUERIDAS
+
+1. **CRUD completo de usuários**
+2. **Endpoint para cálculo do dígito**
+   - Associação opcional a um usuário
+3. **Endpoint para recuperar todos os cálculos de um usuário**
+4. **Endpoint para envio da chave pública**
+   - Recebe string contendo a chave para criptografia
+
+---
+
+## 💾 CACHE
+
+### Especificações
+- Cache em memória para os **últimos 10 cálculos** de digitoUnicos
+- **Independente de usuário**
+- Se cálculo já existe no cache, não executar função novamente
+- **⚠️ Não é permitido usar frameworks de mercado para cache**
+
+---
+
+## 🔐 CRIPTOGRAFIA
+
+### Requisitos de Segurança
+- **Algoritmo:** RSA assimétrico 2048 bits
+- **Dados criptografados:** nome e email do usuário
+- **Chave única:** cada usuário pode ter chave distinta
+- **Fluxo:** 
+  - Criptografia com chave pública do cliente
+  - Descriptografia com chave privada do cliente
+
+---
+
+## 📦 ENTREGA
+
+### Repositório
+- **Plataforma:** GitLab (https://gitlab.com)
+- **Permissão:** adicionar andre.mendes@inter.co e marco.lopes@inter.co como developer
+
+### Arquivos Obrigatórios na Raiz
+1. **README.md** contendo:
+   - Como compilar e executar a aplicação
+   - Como executar os testes unitários
+   - Comentários adicionais (opcional)
+
+2. **postman_collection.json**
+   - Coleção com testes integrados
+
+3. **Arquivo Swagger/OpenAPI**
+   - Especificação completa da API
+
+---
+
+## 🚀 DICAS PARA IMPLEMENTAÇÃO
+
+1. **Comece simples:** implemente primeiro a lógica do dígito único
+2. **Incremental:** adicione funcionalidades progressivamente
+3. **Teste sempre:** mantenha cobertura de testes durante desenvolvimento
+4. **Cache personalizado:** implemente sua própria solução de cache
+5. **Criptografia por último:** deixe para implementar no final
+
+---
+
+*Boa sorte com o desafio! 🍀*
